@@ -7,6 +7,11 @@ export interface InstCLS extends BaseInst {
   type: "CLS";
 }
 
+export interface InstDAT extends BaseInst {
+  type: "DAT";
+  data: number;
+}
+
 export interface InstRET extends BaseInst {
   type: "RET";
 }
@@ -235,7 +240,8 @@ export type Inst =
   | InstLDIV
   | InstLDVI
   | InstBAD
-  | InstSYS;
+  | InstSYS
+  | InstDAT;
 
 export class UnknownInstructionError extends Error {
   name = "UnknownInstruction";

@@ -1,4 +1,4 @@
-label_00d4:
+fn_00d4:
   ld I, #754                  ; 0xa2f2 @ 0x02d4
   ld I, Ve.B                  ; 0xfe33 @ 0x02d6
   ld V2, I                    ; 0xf265 @ 0x02d8
@@ -19,7 +19,7 @@ main:
   drw Va, Vb                  ; 0xdab6 @ 0x020a
   drw Vc, Vd                  ; 0xdcd6 @ 0x020c
   ld Ve, #0                   ; 0x6e00 @ 0x020e
-  call label_00d4             ; 0x22d4 @ 0x0210
+  call fn_00d4                ; 0x22d4 @ 0x0210
   ld V6, #3                   ; 0x6603 @ 0x0212
   ld V8, #2                   ; 0x6802 @ 0x0214
   ld V0, #96                  ; 0x6060 @ 0x0216
@@ -94,9 +94,9 @@ main:
   jmp #0x02c2                 ; 0x12c2 @ 0x02a0
   ld V0, #32                  ; 0x6020 @ 0x02a2
   ld ST, V0                   ; 0xf018 @ 0x02a4
-  call label_00d4             ; 0x22d4 @ 0x02a6
+  call fn_00d4                ; 0x22d4 @ 0x02a6
   add Ve, V3                  ; 0x8e34 @ 0x02a8
-  call label_00d4             ; 0x22d4 @ 0x02aa
+  call fn_00d4                ; 0x22d4 @ 0x02aa
   ld V6, #62                  ; 0x663e @ 0x02ac
   se V3, #1                   ; 0x3301 @ 0x02ae
   ld V6, #3                   ; 0x6603 @ 0x02b0
@@ -117,9 +117,10 @@ main:
   sne V6, #64                 ; 0x4640 @ 0x02ce
   add V6, #254                ; 0x76fe @ 0x02d0
   jmp #0x026c                 ; 0x126c @ 0x02d2
-  ld V0, V8                   ; 0x8080 @ 0x02ea
-  ld V0, V8                   ; 0x8080 @ 0x02ec
-  ld V0, V8                   ; 0x8080 @ 0x02ee
-  ld V0, V0                   ; 0x8000 @ 0x02f0
-  sys #0x0000                 ; 0x0000 @ 0x02f2
-  sys #0x0000                 ; 0x0000 @ 0x02f4
+data:
+  dat 0x8080                  ; 0x8080 @ 0x02ea
+  dat 0x8080                  ; 0x8080 @ 0x02ec
+  dat 0x8080                  ; 0x8080 @ 0x02ee
+  dat 0x8000                  ; 0x8000 @ 0x02f0
+  dat 0x0000                  ; 0x0000 @ 0x02f2
+  dat 0x0000                  ; 0x0000 @ 0x02f4

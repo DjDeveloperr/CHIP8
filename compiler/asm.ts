@@ -37,6 +37,9 @@ export function instToASM(inst: Inst): string {
     case "CLS":
       return `cls`;
 
+    case "DAT":
+      return `dat 0x${inst.data.toString(16).padStart(4, "0")}`;
+
     case "DRW":
       return `drw V${inst.vx.toString(16)}, V${inst.vy.toString(16)}`;
 
@@ -129,7 +132,7 @@ export function instToASM(inst: Inst): string {
   }
 }
 
-export function sortIntoLabels(insts: Inst[]) {
+export function sortIntoLabels(insts: Inst[], data: Uint8Array) {
   const labels: {
     [name: string]: Inst[];
   } = {};
@@ -165,7 +168,7 @@ export function sortIntoLabels(insts: Inst[]) {
         insts.splice(inst, 1);
       }
     }
-    const name = "label_" + addr.toString(16).padStart(4, "0");
+    const name = "fn_" + addr.toString(16).padStart(4, "0");
     labels[name] = body;
     e.from.forEach((e) => {
       const inst = insts.find((x) => e === x.at);
@@ -175,16 +178,43 @@ export function sortIntoLabels(insts: Inst[]) {
     });
     labels["main"] = insts;
   });
+  const reversed = [...insts].reverse();
+  let lastJmp = reversed.findIndex((e) => e.type === "JMP");
+  if (lastJmp > -1) {
+    const inst = reversed[lastJmp];
+    lastJmp = insts.findIndex((e) => e.at === inst.at);
+    if (inst.type === "JMP") {
+      const instsAfterJmp = insts.slice(lastJmp + 1);
+      if (
+        insts.length > 0 &&
+        instsAfterJmp.every((e) =>
+          !insts.find((x) =>
+            (x.type === "JMP" || x.type === "CALL") &&
+            typeof x.addr === "number" &&
+            (x.addr - 0x200) === e.at
+          )
+        )
+      ) {
+        insts.splice(lastJmp + 1, instsAfterJmp.length);
+        labels["data"] = instsAfterJmp.map((e) => ({
+          type: "DAT",
+          data: (data[e.at] << 8) | data[e.at + 1],
+          at: e.at,
+        }));
+      }
+    }
+  }
   return labels;
 }
 
 export function intoASM(
   insts: Inst[],
+  data: Uint8Array,
   emitAddr = false,
-  emitOp?: Uint8Array,
+  emitOp = false,
 ): string[] {
   const result = [];
-  const labels = sortIntoLabels(insts);
+  const labels = sortIntoLabels(insts, data);
   for (const label in labels) {
     result.push(label + ":");
     const insts = labels[label];
@@ -192,9 +222,7 @@ export function intoASM(
       let asm = "  " + instToASM(inst);
       if (emitAddr || emitOp) {
         asm = asm.padEnd(30, " ");
-        let op = emitOp
-          ? (emitOp[inst.at] << 8 | emitOp[inst.at + 1])
-          : undefined;
+        let op = emitOp ? (data[inst.at] << 8 | data[inst.at + 1]) : undefined;
         asm += `; ${
           op !== undefined ? `0x${op.toString(16).padStart(4, "0")} ` : ""
         }${
